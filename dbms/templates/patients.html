@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patients | Hospital Management System</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="doctors.html">Doctors</a></li>
+                <li><a href="patients.html" class="active">Patients</a></li>
+                <li><a href="appointments.html">Appointments</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section>
+            <h1>Patients</h1>
+            <form id="add-patient-form">
+                <label>Name:</label>
+                <input type="text" id="patient-name" required><br><br>
+                <label>Email:</label>
+                <input type="email" id="patient-email" required><br><br>
+                <label>Phone:</label>
+                <input type="tel" id="patient-phone" required><br><br>
+                <button id="add-patient-btn">Add Patient</button>
+            </form>
+            <div id="patients-list">
+                <!-- Patients list will be populated here using JavaScript -->
+            </div>
+        </section>
+    </main>
+    <script src="/script.js"></script>
+    <script>
+        // Add Patient Form Submission
+        document.getElementById('add-patient-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const patientName = document.getElementById('patient-name').value;
+            const patientEmail = document.getElementById('patient-email').value;
+            const patientPhone = document.getElementById('patient-phone').value;
+            // Send data to PHP using AJAX or Fetch API
+            fetch('/patients', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    add_patient: true,
+                    name: patientName,
+                    email: patientEmail,
+                    phone: patientPhone
+                })
+            })
+            .then((response) => response.text())
+            .then((message) => console.log(message))
+            .catch((error) => console.error(error));
+        });
+
+        // Load Patients List
+        window.addEventListener('DOMContentLoaded', () => {
+            fetch('/patients')
+            .then((response) => response.text())
+            .then((data) => {
+                const patientsListDiv = document.getElementById('patients-list');
+                patientsListDiv.innerHTML = data;
+            })
+            .catch((error) => console.error(error));
+        });
+    </script>
+</body>
+</html>

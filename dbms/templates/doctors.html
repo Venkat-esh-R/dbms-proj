@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctors | Hospital Management System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f3f7fa;
+        }
+
+        header {
+            background-color: #2c3e50;
+            padding: 1rem;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        nav a.active {
+            text-decoration: underline;
+        }
+
+        main {
+            max-width: 700px;
+            margin: 2rem auto;
+            padding: 1rem;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        form label {
+            display: block;
+            margin-top: 1rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+        }
+
+        button {
+            margin-top: 1rem;
+            padding: 10px 20px;
+            background-color: #3498db;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #doctors-list {
+            margin-top: 2rem;
+        }
+
+        .doctor-card {
+            background-color: #ecf0f1;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-left: 5px solid #2980b9;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('index_page') }}">Home</a></li>
+                <li><a href="{{ url_for('doctors_page') }}" class="active">Doctors</a></li>
+                <li><a href="{{ url_for('patients_page') }}">Patients</a></li>
+                <li><a href="{{ url_for('appointments_page') }}">Appointments</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <h1>Doctors</h1>
+        <form id="add-doctor-form">
+            <label for="doctor-name">Name:</label>
+            <input type="text" id="doctor-name" required>
+
+            <label for="doctor-specialty">Specialty:</label>
+            <input type="text" id="doctor-specialty" required>
+
+            <label for="doctor-email">Email:</label>
+            <input type="email" id="doctor-email" required>
+
+            <button type="submit">Add Doctor</button>
+        </form>
+
+        <div id="doctors-list">
+            <h2>All Doctors</h2>
+            <!-- List gets populated here -->
+        </div>
+    </main>
+
+    <script>
+        const form = document.getElementById('add-doctor-form');
+        const doctorsListDiv = document.getElementById('doctors-list');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('doctor-name').value;
+            const specialty = document.getElementById('doctor-specialty').value;
+            const email = document.getElementById('doctor-email').value;
+
+            try {
+                const response = await fetch('/doctors', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, specialty, email })
+                });
+
+                const data = await response.json();
+                alert(data.message);
+                form.reset();
+                loadDoctors(); // Refresh the list
+            } catch (error) {
+                alert("Error adding doctor: " + error);
+            }
+        });
+
+        async function loadDoctors() {
+            try {
+                const response = await fetch('/doctors');
+                const doctors = await response.json();
+
+                doctorsListDiv.innerHTML = '<h2>All Doctors</h2>' + doctors.map(doc => `
+                    <div class="doctor-card">
+                        <strong>Name:</strong> ${doc.name}<br>
+                        <strong>Specialty:</strong> ${doc.specialty}<br>
+                        <strong>Email:</strong> ${doc.email}
+                    </div>
+                `).join('');
+            } catch (error) {
+                doctorsListDiv.innerHTML = `<p style="color: red;">Failed to load doctors</p>`;
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', loadDoctors);
+    </script>
+</body>
+</html>

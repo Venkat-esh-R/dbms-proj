@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Appointments | Hospital Management System</title>
+
+<link rel="stylesheet" href="/style.css">
+
+</head>
+
+<body>
+
+<header>
+
+<nav>
+
+<ul>
+
+<li><a href="index.html">Home</a></li>
+
+<li><a href="doctors.html">Doctors</a></li>
+
+<li><a href="patients.html">Patients</a></li>
+
+<li><a href="appointments.html" class="active">Appointments</a></li>
+
+</ul>
+
+</nav>
+
+</header>
+
+<main>
+
+<section>
+
+<h1>Appointments</h1>
+
+<form id="add-appointment-form">
+
+<label>Doctor:</label>
+
+<select id="appointment-doctor" required>
+
+<!-- Doctors list will be populated here using JavaScript -->
+
+</select><br><br>
+
+<label>Patient:</label>
+
+<select id="appointment-patient" required>
+
+<!-- Patients list will be populated here using JavaScript -->
+
+</select><br><br>
+
+<label>Date:</label>
+
+<input type="date" id="appointment-date" required><br><br>
+
+<label>Time:</label>
+
+<input type="time" id="appointment-time" required><br><br>
+
+<button id="add-appointment-btn">Add Appointment</button>
+
+</form>
+
+<div id="appointments-list">
+
+<!-- Appointments list will be populated here using JavaScript -->
+
+</div>
+
+</section>
+
+</main>
+
+
+
+<script src="/script.js"></script>
+
+<script>
+
+// Populate Doctors and Patients Select Options
+
+window.addEventListener('DOMContentLoaded', () => {
+
+fetch('/doctors')
+
+.then((response) => response.text())
+
+.then((data) => {
+
+const doctorsSelect = document.getElementById('appointment-doctor');
+
+const doctors = data.split('</tr>');
+
+doctors.forEach((doctor) => {
+
+if (doctor.includes('<td>')) {
+
+const doctorName = doctor.split('<td>')[1].split('</td>')[0];
+
+const doctorId = doctor.split('delete_doctor=')[1].split('"')[0];
+
+const option = document.createElement('option');
+
+option.value = doctorId;
+
+option.text = doctorName;
+
+doctorsSelect.appendChild(option);
+
+}
+
+});
+
+})
+
+.catch((error) => console.error(error));
+
+
+
+fetch('/patients')
+
+.then((response) => response.text())
+
+.then((data) => {
+
+const patientsSelect = document.getElementById('appointment-patient');
+
+const patients = data.split('</tr>');
+
+patients.forEach((patient) => {
+
+if (patient.includes('<td>')) {
+
+const patientName = patient.split('<td>')[1].split('</td>')[0];
+
+const patientId = patient.split('delete_patient=')[1].split('"')[0];
+
+const option = document.createElement('option');
+
+option.value = patientId;
+
+option.text = patientName;
+
+patientsSelect.appendChild(option);
+
+}
+
+});
+
+})
+
+.catch((error) => console.error(error));
+
+});
+
+
+
+// Add Appointment Form Submission
+
+document.getElementById('add-appointment-form').addEventListener('submit', (e) => {
+
+e.preventDefault();
+
+const doctorId = document.getElementById('appointment-doctor').value;
+
+const patientId = document.getElementById('appointment-patient').value;
+
+const appointmentDate = document.getElementById('appointment-date').value;
+
+const appointmentTime = document.getElementById('appointment-time').value;
+
+// Send data to PHP using AJAX or Fetch API
+
+fetch('/appointments', {
+
+method: 'POST',
+
+headers: {
+
+'Content-Type': 'application/json'
+
+},
+
+body: JSON.stringify({
+
+add_appointment: true,
+
+doctor_id: doctorId,
+
+patient_id: patientId,
+
+appointment_date: appointmentDate,
+
+appointment_time: appointmentTime
+
+})
+
+})
+
+.then((response) => response.text())
+
+.then((message) => console.log(message))
+
+.catch((error) => console.error(error));
+
+});
+
+
+
+// Load Appointments List
+
+window.addEventListener('DOMContentLoaded', () => {
+
+fetch('/appointments')
+
+.then((response) => response.text())
+
+.then((data) => {
+
+const appointmentsListDiv = document.getElementById('appointments-list');
+
+appointmentsListDiv.innerHTML = data;
+
+})
+
+.catch((error) => console.error(error));
+
+});
+
+</script>
